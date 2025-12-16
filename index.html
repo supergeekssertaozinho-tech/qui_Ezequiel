@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Site com Grid de Imagens</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background: #ffffff;
+    }
+
+    header {
+        background: #ffffff;
+        padding: 20px;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: 2px;
+        animation: floatZ 3s ease-in-out infinite;
+        transform-style: preserve-3d;
+    }
+
+    main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* centraliza conteúdo no eixo vertical */
+        align-items: center;
+        gap: 20px;
+        padding: 40px 20px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .card {
+        position: relative;
+        background: #000;
+        height: 180px;
+        overflow: hidden;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: scale(1.03);
+    }
+
+    .card-title {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover .card-title {
+        transform: translateX(5px);
+    }
+
+    .btn-jogar {
+        background: #000;
+        color: #fff;
+        border: none;
+        padding: 12px 25px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: 0.3s ease;
+    }
+
+    .btn-jogar:hover {
+        transform: scale(1.05);
+    }
+
+    footer {
+        background: #000;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        font-size: 0.8rem;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    footer .linha1 { font-style: italic; }
+    footer .linha2 { font-weight: bold; }
+    footer .linha3 { font-family: "Courier New", monospace; }
+    .card::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60%;
+        background: linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0));
+        pointer-events: none;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover::after {
+        transform: translateY(-5px);
+    }
+
+    .btn-jogar:active {
+        transform: scale(0.95);
+    }
+@keyframes floatZ {
+        0% { transform: translateZ(0px); }
+        50% { transform: translateZ(25px); }
+        100% { transform: translateZ(0px); }
+    }
+
+    /* Lightbox */
+    .lightbox-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .lightbox-content {
+        width: 80%;
+        max-width: 600px;
+        height: 80%;
+        background: #fff;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+.card-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+.logo {
+        width: 180px;
+        height: auto;
+        animation: floatZ 3s ease-in-out infinite;
+        transform-style: preserve-3d;
+        display: inline-block;
+    }
+
+@keyframes floatZ {
+        0% { transform: translateZ(0px); }
+        50% { transform: translateZ(25px); }
+        100% { transform: translateZ(0px); }
+    }
+  /* Modal */
+  .image-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  .image-modal img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 10px;
+  }
+  /* Títulos das imagens em preto */
+  .card-title { color: #000 !important; }
+
+    /* Animated cloud outlines background */
+    .cloud-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 100%;
+        background: url('cloud-outline.png') repeat-x;
+        background-size: contain;
+        opacity: 0.25;
+        animation: cloudsMove 60s linear infinite;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    @keyframes cloudsMove {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    /* NUVENS EM CONTORNO (CANVAS ANIMADO) */
+    #clouds-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+        pointer-events: none;
+    }
+</style>
+  <style>
+    /* Floating clouds background */
+    .clouds-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: -2;
+    }
+
+    .cloud {
+      position: absolute;
+      top: 0;
+      width: 300px;
+      height: 150px;
+      background: url('cloud.png') no-repeat center/contain;
+      opacity: 0.6;
+      animation: moveClouds 40s linear infinite;
+    }
+
+    @keyframes moveClouds {
+      0% { transform: translateX(-400px); }
+      100% { transform: translateX(120%); }
+    }
+  </style>
+</head>
+<body>
+    <div class="cloud-background"></div>
+  <div class="clouds-container">
+    <div class="cloud" style="top:10%; animation-delay:0s; animation-duration:45s;"></div>
+    <div class="cloud" style="top:40%; animation-delay:5s; animation-duration:55s;"></div>
+    <div class="cloud" style="top:70%; animation-delay:10s; animation-duration:50s;"></div>
+  </div>
+    <header><img src="20251127_1633_Mystical Duality Logo_simple_compose_01kb3cvd0gfj3ssvd9ey1grwer.png" class="logo"></header>
+
+    <main>
+        <div class="grid">
+            <div class="card"><img src="20251127_1636_Retro Pixel Sky_simple_compose_01kb3d0trde3n8fdvcszw66s2b.png" class="card-img"><span class="card-title">Background</span></div>
+            <div class="card"><img src="20251127_1631_Retro Cloud Tilemap_simple_compose_01kb3cktjxexga8cqjj3wteww8.png" class="card-img"><span class="card-title">Tilemap
+</span></div>
+            <div class="card"><img src="20251127_1620_Anjo Pixel Art_simple_compose_01kb3bztk6en1a6yfdrc8vkbf9.png" class="card-img"><span class="card-title">Player - Anjo
+</span></div>
+            <div class="card"><img src="20251127_1625_Retro Pixel Demon Sprite_simple_compose_01kb3ca8vgetc95tw5j3ppres9.png" class="card-img"><span class="card-title">Inimigo - Demômio</span></div>
+        </div>
+
+        <button class="btn-jogar">Jogar agora</button>
+    </main>
+
+    <footer>
+        <div class="linha1">Projeto desenvolvido por Ezequiel Filipe Silverio</div>
+        <div class="linha2">Produzido no Curso Natal IA - SuperGeeks Sertãozinho</div>
+        <div class="linha3">Todos os direitos reservados.</div>
+    </footer>
+    <div class="lightbox-bg" id="lightbox">
+        <div class="lightbox-content"></div>
+    </div>
+
+<script>
+    const cards = document.querySelectorAll('.card');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxContent = document.querySelector('.lightbox-content');
+
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            lightbox.style.display = 'flex';
+            lightboxContent.style.transform = 'scale(0.2)';
+            setTimeout(() => {
+                lightboxContent.style.transform = 'scale(1)';
+            }, 10);
+        });
+    });
+
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+            lightbox.style.display = 'none';
+        }
+    });
+  /* Abrir imagem ao clicar */
+  const modal = document.getElementById('imageModal');
+  const modalImg = document.getElementById('modalImage');
+
+  document.querySelectorAll('.card img').forEach(img => {
+    img.addEventListener('click', () => {
+      modalImg.src = img.src;
+      modal.style.display = 'flex';
+    });
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
+  });
+</script>
+  <!-- Modal para visualização em tamanho real -->
+  <div class="image-modal" id="imageModal">
+    <div class="image-modal-content">
+      <img id="modalImage" src="" alt="Imagem ampliada">
+    </div>
+  </div>
+<canvas id="clouds-canvas"></canvas>
+
+<script>
+    /* ------------------ ANIMAÇÃO DAS NUVENS ------------------ */
+    const canvas = document.getElementById('clouds-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Cloud {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height * 0.8;
+            this.size = 40 + Math.random() * 80;
+            this.speed = 0.3 + Math.random() * 0.7;
+        }
+        update() {
+            this.x += this.speed;
+            if (this.x - this.size > canvas.width) {
+                this.x = -this.size;
+                this.y = Math.random() * canvas.height * 0.8;
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.arc(this.x, this.y, this.size, Math.PI * 0.4, Math.PI * 1.6);
+            ctx.arc(this.x + this.size * 0.6, this.y - this.size * 0.3, this.size * 0.7, Math.PI * 0.9, Math.PI * 2.1);
+            ctx.stroke();
+        }
+    }
+
+    const clouds = Array.from({ length: 12 }, () => new Cloud());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        clouds.forEach(c => {
+            c.update();
+            c.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+</script>
+</body>
+</html>
